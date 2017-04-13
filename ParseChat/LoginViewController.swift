@@ -46,6 +46,7 @@ class LoginViewController: UIViewController {
                 self.present(alertController, animated: true, completion: nil)
             } else {
                 // Hooray! Let them use the app now.
+                self.performSegue(withIdentifier: "Chat", sender: nil)
             }
         }
         
@@ -56,6 +57,8 @@ class LoginViewController: UIViewController {
         PFUser.logInWithUsername(inBackground: email.text!, password: password.text!) { (user: PFUser?, error:Error?) in
             if user != nil {
                 // Segue to login screen
+                self.performSegue(withIdentifier: "Chat", sender: nil)
+                
             } else {
                 let alertController = UIAlertController(title: "Login Failed", message: "Invalid credentials", preferredStyle: .alert)
                 let alertAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
