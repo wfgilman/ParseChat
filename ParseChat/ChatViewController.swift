@@ -9,12 +9,20 @@
 import UIKit
 import Parse
 
-class ChatViewController: UIViewController {
+class ChatViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet var messageTextField: UITextField!
+    @IBOutlet weak var tableView: UITableView!
+    
+    var localMessages = [String]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 100.0
+        
+        Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ChatViewController.refreshMessage), userInfo: nil, repeats: true)
 
         // Do any additional setup after loading the view.
     }
@@ -23,11 +31,11 @@ class ChatViewController: UIViewController {
         var message = PFObject(className: "Message")
         message["text"] = messageTextField.text
         
-        message.saveInBackground { (success:Bool, error:Error!) in
-            if success{
-                print("The message is saved")
-            }else{
-                print("error\(error.localizedDescription)")
+        message.saveInBackground { (success: Bool, error: Error?) in
+            if (success) {
+                print("The message is saved!")
+            } else {
+                print("Error: \(error?.localizedDescription)")
             }
         }
     }
@@ -37,6 +45,27 @@ class ChatViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ChatCell", for: indexPath) as! ChatCell
+        cell.chatMessageLabel.text = "Chat message"
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 15
+    }
+    
+    func refreshMessage() {
+//        var message = PFObject(className: "Message")
+        var query = PFQuery(className: "Message")
+        query.findObjectsInBackground { (messages: [PFObject]?, error: Error?) in
+            if error == nil && messages != nil {
+                for message in messages {
+                    localMessages.append(message["text"])
+                }
+            }
+        }
+    }
 
     /*
     // MARK: - Navigation
